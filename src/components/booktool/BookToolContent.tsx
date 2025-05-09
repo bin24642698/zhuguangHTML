@@ -21,6 +21,7 @@ interface BookToolContentProps {
   onFileUploaded: (chapters: Array<{id: number, title: string, content: string}>, fileName: string) => void;
   onAnalysisResult: (result: string) => void;
   fileName: string;
+  focusedChapterId?: number | null; // 新增：当前焦点章节ID
 }
 
 const BookToolContent: React.FC<BookToolContentProps> = ({
@@ -31,7 +32,8 @@ const BookToolContent: React.FC<BookToolContentProps> = ({
   setIsProcessing,
   onFileUploaded,
   onAnalysisResult,
-  fileName
+  fileName,
+  focusedChapterId
 }) => {
   const { isAuthenticated } = useAuth();
   const [selectedModel, setSelectedModel] = useState<string>(MODELS.GEMINI_FLASH); // 默认使用普通版
@@ -41,6 +43,9 @@ const BookToolContent: React.FC<BookToolContentProps> = ({
   const resultRef = useRef<HTMLDivElement>(null);
   const [wordCount, setWordCount] = useState(0); // 新增：字数统计状态
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 创建章节引用的Map
+  const chapterRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
 
   // 作品选择相关状态
   const [showWorkSelection, setShowWorkSelection] = useState(false);
@@ -71,6 +76,25 @@ const BookToolContent: React.FC<BookToolContentProps> = ({
     const count = result ? result.trim().length : 0; // 或者使用更复杂的中文分词库
     setWordCount(count);
   }, [result]);
+
+  // 滚动到指定章节的函数
+  const scrollToChapter = (chapterId: number) => {
+    // 获取章节引用
+    const chapterElement = chapterRefs.current.get(chapterId);
+
+    if (chapterElement) {
+      // 滚动到章节
+      chapterElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // 监听focusedChapterId变化，滚动到对应章节
+  useEffect(() => {
+    if (focusedChapterId && !result && !isProcessing) {
+      // 只在预览模式下滚动（没有分析结果且不在处理中）
+      setTimeout(() => scrollToChapter(focusedChapterId), 100);
+    }
+  }, [focusedChapterId, result, isProcessing]);
 
   // 在组件加载时获取提示词和作品列表
   useEffect(() => {
@@ -862,7 +886,14 @@ const BookToolContent: React.FC<BookToolContentProps> = ({
                         {chapters
                           .filter(chapter => selectedChapters.includes(chapter.id))
                           .map((chapter, index) => (
-                            <div key={chapter.id} className="mb-8">
+                            <div
+                              key={chapter.id}
+                              className="mb-8"
+                              ref={(el) => {
+                                if (el) chapterRefs.current.set(chapter.id, el);
+                              }}
+                              id={`chapter-${chapter.id}`}
+                            >
                               <h2 className="text-xl font-bold text-[#6F9CE0] border-b border-[rgba(111,156,224,0.2)] pb-2 mb-4">
                                 {chapter.title}
                               </h2>

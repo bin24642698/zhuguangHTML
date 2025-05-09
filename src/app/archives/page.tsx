@@ -67,40 +67,23 @@ export default function ArchivesPage() {
   // 当选中的作品变化时，加载该作品的档案
   useEffect(() => {
     const fetchArchives = async () => {
-      if (selectedWorkId === null) {
-        // 如果没有选中作品，加载所有档案
-        try {
-          const allArchives = await getAllArchives();
-          setArchives(allArchives);
-          // 默认选中第一个档案
-          if (allArchives.length > 0) {
-            setSelectedArchive(allArchives[0]);
-            setEditedArchive(allArchives[0]);
-          } else {
-            setSelectedArchive(null);
-            setEditedArchive(null);
-          }
-        } catch (error) {
-          console.error('获取所有档案失败:', error);
-          setError('获取档案失败，请稍后再试');
+      if (!selectedWorkId) return;
+
+      // 加载选中作品的档案
+      try {
+        const workArchives = await getArchivesByWorkId(selectedWorkId);
+        setArchives(workArchives);
+        // 默认选中第一个档案
+        if (workArchives.length > 0) {
+          setSelectedArchive(workArchives[0]);
+          setEditedArchive(workArchives[0]);
+        } else {
+          setSelectedArchive(null);
+          setEditedArchive(null);
         }
-      } else {
-        // 加载选中作品的档案
-        try {
-          const workArchives = await getArchivesByWorkId(selectedWorkId);
-          setArchives(workArchives);
-          // 默认选中第一个档案
-          if (workArchives.length > 0) {
-            setSelectedArchive(workArchives[0]);
-            setEditedArchive(workArchives[0]);
-          } else {
-            setSelectedArchive(null);
-            setEditedArchive(null);
-          }
-        } catch (error) {
-          console.error(`获取作品ID为${selectedWorkId}的档案失败:`, error);
-          setError('获取档案失败，请稍后再试');
-        }
+      } catch (error) {
+        console.error(`获取作品ID为${selectedWorkId}的档案失败:`, error);
+        setError('获取档案失败，请稍后再试');
       }
     };
 
@@ -160,10 +143,7 @@ export default function ArchivesPage() {
       await updateArchive(editedArchive);
 
       // 更新档案列表
-      if (selectedWorkId === null) {
-        const allArchives = await getAllArchives();
-        setArchives(allArchives);
-      } else {
+      if (selectedWorkId) {
         const workArchives = await getArchivesByWorkId(selectedWorkId);
         setArchives(workArchives);
       }
@@ -182,7 +162,7 @@ export default function ArchivesPage() {
   // 创建新档案
   const handleCreateArchive = async () => {
     // 如果没有选择特定作品或特定分类，不允许创建
-    if (selectedWorkId === null || selectedCategory === null) return;
+    if (!selectedWorkId || selectedCategory === null) return;
 
     try {
       const newArchive: Omit<Archive, 'id'> = {
@@ -198,10 +178,7 @@ export default function ArchivesPage() {
       const createdArchive = await addArchive(newArchive);
 
       // 重新加载档案列表
-      if (selectedWorkId === null) {
-        const allArchives = await getAllArchives();
-        setArchives(allArchives);
-      } else {
+      if (selectedWorkId) {
         const workArchives = await getArchivesByWorkId(selectedWorkId);
         setArchives(workArchives);
       }
@@ -223,10 +200,7 @@ export default function ArchivesPage() {
       await deleteArchive(selectedArchive.id);
 
       // 重新加载档案列表
-      if (selectedWorkId === null) {
-        const allArchives = await getAllArchives();
-        setArchives(allArchives);
-      } else {
+      if (selectedWorkId) {
         const workArchives = await getArchivesByWorkId(selectedWorkId);
         setArchives(workArchives);
       }
@@ -270,10 +244,7 @@ export default function ArchivesPage() {
       const savedArchive = await updateArchive(updatedArchive);
 
       // 重新加载档案列表
-      if (selectedWorkId === null) {
-        const allArchives = await getAllArchives();
-        setArchives(allArchives);
-      } else {
+      if (selectedWorkId) {
         const workArchives = await getArchivesByWorkId(selectedWorkId);
         setArchives(workArchives);
       }
@@ -305,10 +276,7 @@ export default function ArchivesPage() {
       await deleteArchive(archiveToDelete.id);
 
       // 重新加载档案列表
-      if (selectedWorkId === null) {
-        const allArchives = await getAllArchives();
-        setArchives(allArchives);
-      } else {
+      if (selectedWorkId) {
         const workArchives = await getArchivesByWorkId(selectedWorkId);
         setArchives(workArchives);
       }
@@ -370,6 +338,7 @@ export default function ArchivesPage() {
         <TopBar
           title="档案馆"
           isHomePage={false}
+          showBackButton={true}
         />
 
         {/* 主要内容区 - 使用大卡片包裹整个内容 */}
@@ -402,12 +371,12 @@ export default function ArchivesPage() {
                   <div className="flex items-center space-x-2">
                     <button
                       className={`px-3 py-1.5 rounded-full flex items-center shadow-sm text-sm ${
-                        selectedWorkId === null || selectedCategory === null
+                        !selectedWorkId || selectedCategory === null
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           : 'bg-[#7D85CC] text-white hover:bg-[#6b73b3] transition-colors duration-200'
                       }`}
                       onClick={handleCreateArchive}
-                      disabled={selectedWorkId === null || selectedCategory === null}
+                      disabled={!selectedWorkId || selectedCategory === null}
                     >
                       <span className="material-icons text-sm mr-1">add</span>
                       新建档案

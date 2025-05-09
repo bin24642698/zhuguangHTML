@@ -44,10 +44,9 @@ const ArchiveFilters: React.FC<ArchiveFiltersProps> = ({
           <div className="relative flex-1">
             <select
               className="w-full text-sm bg-white border border-[rgba(125,133,204,0.3)] rounded-lg px-3 py-1.5 focus:border-[#7D85CC] focus:outline-none appearance-none pr-8"
-              value={selectedWorkId === null ? "" : selectedWorkId}
-              onChange={(e) => onWorkChange(e.target.value ? Number(e.target.value) : null)}
+              value={selectedWorkId || ""}
+              onChange={(e) => onWorkChange(Number(e.target.value))}
             >
-              <option value="">全部作品</option>
               {works.map((work) => (
                 <option key={work.id} value={work.id}>{work.title}</option>
               ))}

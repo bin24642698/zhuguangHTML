@@ -200,10 +200,55 @@ body {
 
 .booktool-sidebar-content {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden; /* 外部容器不显示滚动条 */
+  padding-bottom: 20px; /* 减少底部内边距 */
+  position: relative;
+  border-bottom: 1px solid rgba(111,156,224,0.1); /* 添加底部边框，使视觉边界更明确 */
+}
+
+/* 内部容器样式 */
+.chapters-inner-container {
+  height: 100%;
+  overflow-y: auto; /* 内部容器显示滚动条 */
   overflow-x: hidden;
   padding-right: 0.5rem;
-  max-height: calc(100vh - 350px);
+  max-height: calc(100vh - 220px - 20px); /* 减去底部内边距的高度 */
+  scrollbar-width: thin; /* Firefox滚动条样式 */
+  scrollbar-color: var(--accent-brown) var(--gray-100); /* Firefox滚动条颜色 */
+  overscroll-behavior: contain; /* 防止滚动传播 */
+}
+
+/* 确保滚动条始终可见 */
+.chapters-inner-container::-webkit-scrollbar {
+  width: 8px;
+  display: block;
+}
+
+.chapters-inner-container::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: var(--radius-full);
+  margin: 4px 0;
+}
+
+.chapters-inner-container::-webkit-scrollbar-thumb {
+  background: var(--accent-brown);
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  background-clip: content-box;
+  min-height: 40px;
+}
+
+/* 添加底部视觉边界 */
+.booktool-sidebar-content::after {
+  content: '';
+  display: block;
+  height: 4px;
+  background: linear-gradient(to bottom, rgba(111,156,224,0.05), transparent);
+  position: absolute;
+  bottom: 20px; /* 与新的底部内边距对齐 */
+  left: 0;
+  right: 8px; /* 留出滚动条的宽度 */
+  pointer-events: none;
 }
 
 .booktool-main {

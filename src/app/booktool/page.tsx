@@ -56,6 +56,7 @@ export default function BookToolPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
+  const [focusedChapterId, setFocusedChapterId] = useState<number | null>(null);
 
   // 处理章节选择
   const handleChapterSelect = (chapterId: number) => {
@@ -95,6 +96,11 @@ export default function BookToolPage() {
 
     // 设置选中的章节
     setSelectedChapters(orderedChapterIds);
+  };
+
+  // 处理章节点击，设置焦点章节ID
+  const handleChapterClick = (chapterId: number) => {
+    setFocusedChapterId(chapterId);
   };
 
   // 处理文件上传成功
@@ -222,6 +228,7 @@ export default function BookToolPage() {
                 onChapterSelect={handleChapterSelect}
                 onSelectAll={handleSelectAll}
                 onRangeSelect={handleRangeSelect}
+                onChapterClick={handleChapterClick}
               />
 
               {/* 右侧内容区 */}
@@ -234,6 +241,7 @@ export default function BookToolPage() {
                 onFileUploaded={handleFileUploaded}
                 onAnalysisResult={handleAnalysisResult}
                 fileName={fileName}
+                focusedChapterId={focusedChapterId}
               />
             </div>
             <div className="page-curl"></div>

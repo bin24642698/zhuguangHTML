@@ -8,7 +8,8 @@ interface BookToolSidebarProps {
   selectedChapters: number[];
   onChapterSelect: (chapterId: number) => void;
   onSelectAll: () => void;
-  onRangeSelect: (startChapter: number, endChapter: number) => void; // 新增
+  onRangeSelect: (startChapter: number, endChapter: number) => void;
+  onChapterClick?: (chapterId: number) => void; // 新增：点击章节时的回调
 }
 
 const BookToolSidebar: React.FC<BookToolSidebarProps> = ({
@@ -16,7 +17,8 @@ const BookToolSidebar: React.FC<BookToolSidebarProps> = ({
   selectedChapters,
   onChapterSelect,
   onSelectAll,
-  onRangeSelect
+  onRangeSelect,
+  onChapterClick
 }) => {
   // 全选状态
   const allSelected = chapters.length > 0 && selectedChapters.length === chapters.length;
@@ -28,6 +30,9 @@ const BookToolSidebar: React.FC<BookToolSidebarProps> = ({
   // 错误提示状态
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showError, setShowError] = useState<boolean>(false);
+
+  // 是否应该滚动到选中章节的标志
+  const [shouldScroll, setShouldScroll] = useState<boolean>(false);
 
   // 创建章节列表容器的引用
   const chaptersContainerRef = React.useRef<HTMLDivElement>(null);
@@ -47,13 +52,17 @@ const BookToolSidebar: React.FC<BookToolSidebarProps> = ({
     }
   };
 
-  // 监听selectedChapters变化，触发滚动
+  // 监听shouldScroll变化，只在范围选择时触发滚动
   React.useEffect(() => {
-    if (selectedChapters.length > 0) {
+    if (shouldScroll && selectedChapters.length > 0) {
       // 使用较长的延迟确保DOM已更新
-      setTimeout(scrollToFirstSelectedChapter, 200);
+      setTimeout(() => {
+        scrollToFirstSelectedChapter();
+        // 滚动完成后重置标志
+        setShouldScroll(false);
+      }, 200);
     }
-  }, [selectedChapters]); // 依赖于selectedChapters
+  }, [shouldScroll, selectedChapters]); // 依赖于shouldScroll和selectedChapters
 
   // 处理范围选择
   const handleRangeSelectClick = () => {
@@ -67,6 +76,9 @@ const BookToolSidebar: React.FC<BookToolSidebarProps> = ({
       setShowError(true);
       return;
     }
+
+    // 设置滚动标志为true，表示应该滚动到选中章节
+    setShouldScroll(true);
 
     // 调用回调函数
     onRangeSelect(start, end);
@@ -151,12 +163,13 @@ const BookToolSidebar: React.FC<BookToolSidebarProps> = ({
               </div>
             </div>
 
-            <div className="booktool-sidebar-content" ref={chaptersContainerRef}>
+            <div className="booktool-sidebar-content">
+              <div className="chapters-inner-container" ref={chaptersContainerRef}>
               {chapters.map(chapter => (
                 <div
                   key={chapter.id}
                   data-chapter-id={chapter.id}
-                  className={`p-3 rounded-lg cursor-pointer transition-all duration-200 flex items-start max-w-[90%] ${
+                  className={`p-3 pb-4 mb-2 rounded-lg cursor-pointer transition-all duration-200 flex items-start max-w-[90%] ${
                     selectedChapters.includes(chapter.id)
                       ? 'bg-[rgba(111,156,224,0.1)] border-l-4 border-[#6F9CE0] shadow-sm'
                       : 'hover:bg-[rgba(111,156,224,0.05)] border-l-4 border-transparent'
@@ -164,6 +177,11 @@ const BookToolSidebar: React.FC<BookToolSidebarProps> = ({
                   onClick={() => {
                     // 如果章节已经选中，则取消选中；否则选中章节
                     onChapterSelect(chapter.id);
+
+                    // 调用章节点击回调，通知父组件滚动到该章节
+                    if (onChapterClick) {
+                      onChapterClick(chapter.id);
+                    }
                   }}
                 >
                   <span className="material-icons text-sm mr-2 mt-1 text-[#6F9CE0]">
@@ -171,15 +189,16 @@ const BookToolSidebar: React.FC<BookToolSidebarProps> = ({
                   </span>
                   <div className="flex-1">
                     <p className="text-text-dark font-medium text-sm truncate max-w-[95%]">{chapter.title}</p>
-                    <div className="flex items-center max-w-[90%]">
-                      <span className="material-icons text-[#6F9CE0] text-xs mr-1">schedule</span>
-                      <p className="text-text-light text-xs truncate">
+                    <div className="flex items-center max-w-[90%] mt-2">
+                      <span className="material-icons text-[#6F9CE0] text-xs mr-1 flex-shrink-0">schedule</span>
+                      <p className="text-text-light text-xs whitespace-nowrap leading-relaxed">
                         {Math.ceil(chapter.content.length / 500)} 分钟阅读
                       </p>
                     </div>
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           </div>
         ) : (

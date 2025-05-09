@@ -74,13 +74,8 @@ export function PromptDetailView({
   if (isEditing) {
     // 编辑模式
     return (
-      <div className="ghibli-card p-6 animate-fadeIn relative min-h-[500px] flex flex-col">
-        {/* 顶部胶带 */}
-        <div className="tape" style={{ backgroundColor: typeColor }}>
-          <div className="tape-texture"></div>
-        </div>
-
-        <div className="mt-6 flex-grow">
+      <div className="flex flex-col min-h-[500px]">
+        <div className="flex-grow">
           <form className="space-y-6 h-full flex flex-col">
             {/* 提示词标题 */}
             <div>
@@ -217,20 +212,12 @@ export function PromptDetailView({
             </button>
           )}
         </div>
-
-        {/* 翻页效果 */}
-        <div className="page-curl"></div>
       </div>
     );
   } else {
     // 查看模式
     return (
-      <div className="ghibli-card p-6 animate-fadeIn relative min-h-[500px] flex flex-col">
-        {/* 顶部胶带 */}
-        <div className="tape" style={{ backgroundColor: typeColor }}>
-          <div className="tape-texture"></div>
-        </div>
-
+      <div className="flex flex-col min-h-[500px]">
         {/* 标题和类型栏 */}
         <div className="flex items-center justify-between mb-6 mt-4">
           <h2 className="text-xl font-medium text-text-dark">{prompt.title}</h2>
@@ -294,9 +281,6 @@ export function PromptDetailView({
             更新于: {formatDate(prompt.updatedAt)}
           </div>
         </div>
-
-        {/* 翻页效果 */}
-        <div className="page-curl"></div>
 
         {/* 操作按钮区 */}
         <div className="flex justify-end mt-6 space-x-3">

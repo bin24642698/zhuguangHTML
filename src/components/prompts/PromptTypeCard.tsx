@@ -63,20 +63,22 @@ export const PromptTypeCard: React.FC<PromptTypeCardProps> = ({
 
   return (
     <Card
-      className="h-80 text-center cursor-pointer hover:shadow-md transition-all duration-300 animate-fadeIn"
+      className="h-80 cursor-pointer hover:shadow-md transition-all duration-300 animate-fadeIn"
       onClick={onClick}
       tapeColor={borderColor}
-      withTape={true}
+      withTape={false}
       withPageCurl={true}
     >
-      <div className="flex flex-col items-center">
-        <div className={`w-14 h-14 mt-8 mb-6 rounded-full ${typeInfo.color.split(' ')[0]} flex items-center justify-center`}>
-          <span className={`material-icons text-2xl ${typeInfo.color.split(' ')[1]}`}>{typeInfo.icon}</span>
+      <div className="flex flex-col h-full">
+        {/* 顶部LOGO和标题在同一行 */}
+        <div className="flex items-center mb-4">
+          <div className={`w-12 h-12 rounded-full ${typeInfo.color.split(' ')[0]} flex items-center justify-center mr-3`}>
+            <span className={`material-icons text-xl ${typeInfo.color.split(' ')[1]}`}>{typeInfo.icon}</span>
+          </div>
+          <h3 className="font-medium text-text-dark text-xl font-ma-shan">{typeInfo.label}</h3>
         </div>
 
-        <h3 className="font-medium text-text-dark text-xl mb-4 font-ma-shan">{typeInfo.label}</h3>
-
-        <p className="text-text-medium text-sm mb-6 px-6">
+        <p className="text-text-medium text-sm mb-6">
           {getTypeDescription(type)}
         </p>
 

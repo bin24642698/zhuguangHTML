@@ -527,22 +527,21 @@ export default function PromptTypePage() {
                   return (
                     <div
                       key={prompt.id}
-                      className="ghibli-card h-80 text-center cursor-pointer animate-fadeIn"
+                      className="ghibli-card h-80 cursor-pointer animate-fadeIn"
                       onClick={() => openDetailModal(prompt, false)}
                     >
-                      <div className="tape" style={{ backgroundColor: tapeColor }}>
-                        <div className="tape-texture"></div>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className={`w-14 h-14 mt-8 mb-6 rounded-full ${bgColor} flex items-center justify-center`}>
-                          <span className={`material-icons text-2xl ${colorText}`}>{typeConfig.icon}</span>
+                      <div className="flex flex-col h-full">
+                        {/* 顶部LOGO和标题在同一行 */}
+                        <div className="flex items-center mb-4">
+                          <div className={`w-12 h-12 rounded-full ${bgColor} flex items-center justify-center mr-3`}>
+                            <span className={`material-icons text-xl ${colorText}`}>{typeConfig.icon}</span>
+                          </div>
+                          <h3 className="font-medium text-text-dark text-xl font-ma-shan">
+                            {highlightMatch(prompt.title, searchTerm)}
+                          </h3>
                         </div>
 
-                        <h3 className="font-medium text-text-dark text-xl mb-4 font-ma-shan">
-                          {highlightMatch(prompt.title, searchTerm)}
-                        </h3>
-
-                        <p className="text-text-medium text-sm mb-6 px-6 line-clamp-3">
+                        <p className="text-text-medium text-sm mb-6 line-clamp-3">
                           {prompt.description ? highlightMatch(prompt.description, searchTerm) : '无描述'}
                         </p>
 
@@ -633,22 +632,21 @@ export default function PromptTypePage() {
                       return (
                         <div
                           key={prompt.id}
-                          className="ghibli-card h-80 text-center cursor-pointer animate-fadeIn"
+                          className="ghibli-card h-80 cursor-pointer animate-fadeIn"
                           onClick={() => openDetailModal(prompt, false)}
                         >
-                          <div className="tape" style={{ backgroundColor: tapeColor }}>
-                            <div className="tape-texture"></div>
-                          </div>
-                          <div className="flex flex-col items-center">
-                            <div className={`w-14 h-14 mt-8 mb-6 rounded-full ${bgColor} flex items-center justify-center`}>
-                              <span className={`material-icons text-2xl ${colorText}`}>{typeConfig.icon}</span>
+                          <div className="flex flex-col h-full">
+                            {/* 顶部LOGO和标题在同一行 */}
+                            <div className="flex items-center mb-4">
+                              <div className={`w-12 h-12 rounded-full ${bgColor} flex items-center justify-center mr-3`}>
+                                <span className={`material-icons text-xl ${colorText}`}>{typeConfig.icon}</span>
+                              </div>
+                              <h3 className="font-medium text-text-dark text-xl font-ma-shan">
+                                {highlightMatch(prompt.title, searchTerm)}
+                              </h3>
                             </div>
 
-                            <h3 className="font-medium text-text-dark text-xl mb-4 font-ma-shan">
-                              {highlightMatch(prompt.title, searchTerm)}
-                            </h3>
-
-                            <p className="text-text-medium text-sm mb-6 px-6 line-clamp-3">
+                            <p className="text-text-medium text-sm mb-6 line-clamp-3">
                               {prompt.description ? highlightMatch(prompt.description, searchTerm) : '无描述'}
                             </p>
 

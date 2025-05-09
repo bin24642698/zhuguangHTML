@@ -1,25 +1,97 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import ErrorModal from '@/components/common/ErrorModal';
 
 interface BookToolSidebarProps {
   chapters: Array<{id: number, title: string, content: string}>;
   selectedChapters: number[];
   onChapterSelect: (chapterId: number) => void;
   onSelectAll: () => void;
+  onRangeSelect: (startChapter: number, endChapter: number) => void; // 新增
 }
 
 const BookToolSidebar: React.FC<BookToolSidebarProps> = ({
   chapters,
   selectedChapters,
   onChapterSelect,
-  onSelectAll
+  onSelectAll,
+  onRangeSelect
 }) => {
   // 全选状态
   const allSelected = chapters.length > 0 && selectedChapters.length === chapters.length;
 
+  // 添加状态管理范围选择的输入值
+  const [startChapter, setStartChapter] = useState<string>('');
+  const [endChapter, setEndChapter] = useState<string>('');
+
+  // 错误提示状态
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [showError, setShowError] = useState<boolean>(false);
+
+  // 创建章节列表容器的引用
+  const chaptersContainerRef = React.useRef<HTMLDivElement>(null);
+
+  // 滚动到第一个选中的章节
+  const scrollToFirstSelectedChapter = () => {
+    if (chaptersContainerRef.current && selectedChapters.length > 0) {
+      // 找到第一个选中章节的DOM元素
+      const firstSelectedChapterElement = chaptersContainerRef.current.querySelector(
+        `[data-chapter-id="${selectedChapters[0]}"]`
+      );
+
+      if (firstSelectedChapterElement) {
+        // 滚动到该元素
+        firstSelectedChapterElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
+
+  // 监听selectedChapters变化，触发滚动
+  React.useEffect(() => {
+    if (selectedChapters.length > 0) {
+      // 使用较长的延迟确保DOM已更新
+      setTimeout(scrollToFirstSelectedChapter, 200);
+    }
+  }, [selectedChapters]); // 依赖于selectedChapters
+
+  // 处理范围选择
+  const handleRangeSelectClick = () => {
+    const start = parseInt(startChapter);
+    const end = parseInt(endChapter);
+
+    // 验证输入
+    if (isNaN(start) || isNaN(end) || start < 1 || end > chapters.length || start > end) {
+      // 设置错误信息并显示错误提示
+      setErrorMessage(`请输入有效范围：1-${chapters.length}`);
+      setShowError(true);
+      return;
+    }
+
+    // 调用回调函数
+    onRangeSelect(start, end);
+
+    // 清空输入框
+    setStartChapter('');
+    setEndChapter('');
+
+    // 不再需要这里的setTimeout，因为我们已经在useEffect中监听selectedChapters变化
+  };
+
+  // 关闭错误提示
+  const handleCloseError = () => {
+    setShowError(false);
+  };
+
   return (
     <div className="booktool-sidebar bg-white animate-slideIn">
+        {/* 使用Portal渲染的错误提示弹窗 */}
+        <ErrorModal
+          show={showError}
+          message={errorMessage}
+          onClose={handleCloseError}
+        />
+
         <div className="booktool-sidebar-header">
           <h3 className="text-lg font-medium text-text-dark flex items-center font-ma-shan">
             <span className="material-icons text-[#6F9CE0] mr-2">menu_book</span>
@@ -29,31 +101,70 @@ const BookToolSidebar: React.FC<BookToolSidebarProps> = ({
 
         {chapters.length > 0 ? (
           <div className="p-4 flex flex-col h-full">
-            <div className="flex items-center mb-4 bg-[rgba(111,156,224,0.05)] p-3 rounded-lg border border-[rgba(111,156,224,0.2)] flex-shrink-0">
-              <button
-                className="flex items-center text-sm text-[#6F9CE0] hover:text-[#5A8BD0] transition-colors"
-                onClick={onSelectAll}
-              >
-                <span className="material-icons text-sm mr-1">
-                  {allSelected ? 'check_box' : 'check_box_outline_blank'}
+            <div className="flex flex-col mb-4 bg-[rgba(111,156,224,0.05)] p-3 rounded-lg border border-[rgba(111,156,224,0.2)] flex-shrink-0">
+              <div className="flex items-center mb-2">
+                <button
+                  className="flex items-center text-sm text-[#6F9CE0] hover:text-[#5A8BD0] transition-colors"
+                  onClick={() => {
+                    onSelectAll();
+                  }}
+                >
+                  <span className="material-icons text-sm mr-1">
+                    {allSelected ? 'check_box' : 'check_box_outline_blank'}
+                  </span>
+                  {allSelected ? '取消全选' : '全选'}
+                </button>
+                <span className="ml-auto text-sm text-text-light bg-[rgba(111,156,224,0.1)] px-2 py-1 rounded-full">
+                  已选择 {selectedChapters.length}/{chapters.length}
                 </span>
-                {allSelected ? '取消全选' : '全选'}
-              </button>
-              <span className="ml-auto text-sm text-text-light bg-[rgba(111,156,224,0.1)] px-2 py-1 rounded-full">
-                已选择 {selectedChapters.length}/{chapters.length}
-              </span>
+              </div>
+
+              {/* 范围选择输入框 */}
+              <div className="flex items-center mt-2">
+                <div className="flex items-center space-x-1">
+                  <input
+                    type="number"
+                    min="1"
+                    max={chapters.length}
+                    value={startChapter}
+                    onChange={(e) => setStartChapter(e.target.value)}
+                    className="w-20 h-8 text-sm border border-[rgba(111,156,224,0.3)] rounded-md px-2 text-center"
+                    placeholder="起始"
+                  />
+                  <span className="text-text-light">-</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max={chapters.length}
+                    value={endChapter}
+                    onChange={(e) => setEndChapter(e.target.value)}
+                    className="w-20 h-8 text-sm border border-[rgba(111,156,224,0.3)] rounded-md px-2 text-center"
+                    placeholder="结束"
+                  />
+                </div>
+                <button
+                  className="ml-2 px-2 py-1 text-xs bg-[rgba(111,156,224,0.2)] text-[#6F9CE0] rounded-md hover:bg-[rgba(111,156,224,0.3)] transition-colors"
+                  onClick={handleRangeSelectClick}
+                >
+                  选择范围
+                </button>
+              </div>
             </div>
 
-            <div className="booktool-sidebar-content">
+            <div className="booktool-sidebar-content" ref={chaptersContainerRef}>
               {chapters.map(chapter => (
                 <div
                   key={chapter.id}
+                  data-chapter-id={chapter.id}
                   className={`p-3 rounded-lg cursor-pointer transition-all duration-200 flex items-start max-w-[90%] ${
                     selectedChapters.includes(chapter.id)
                       ? 'bg-[rgba(111,156,224,0.1)] border-l-4 border-[#6F9CE0] shadow-sm'
                       : 'hover:bg-[rgba(111,156,224,0.05)] border-l-4 border-transparent'
                   }`}
-                  onClick={() => onChapterSelect(chapter.id)}
+                  onClick={() => {
+                    // 如果章节已经选中，则取消选中；否则选中章节
+                    onChapterSelect(chapter.id);
+                  }}
                 >
                   <span className="material-icons text-sm mr-2 mt-1 text-[#6F9CE0]">
                     {selectedChapters.includes(chapter.id) ? 'check_box' : 'check_box_outline_blank'}

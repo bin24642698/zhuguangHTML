@@ -743,6 +743,8 @@ const BookToolContent: React.FC<BookToolContentProps> = ({
                   重新上传
                 </button>
 
+
+
                 {/* 开始分析按钮 */}
                 {isProcessing ? (
                   <button
@@ -833,33 +835,58 @@ const BookToolContent: React.FC<BookToolContentProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="bg-white border border-[rgba(111,156,224,0.2)] rounded-lg shadow-sm p-8 flex flex-col items-center justify-center h-full text-text-light relative">
-                  <div className="w-20 h-20 rounded-full bg-[rgba(111,156,224,0.1)] flex items-center justify-center mb-4">
-                    <span className="material-icons text-4xl text-[#6F9CE0]">psychology</span>
+                <div className="bg-white border border-[rgba(111,156,224,0.2)] rounded-lg shadow-sm relative h-full overflow-hidden">
+                  {/* 结果区域顶部 */}
+                  <div className="p-2 border-b border-[rgba(111,156,224,0.2)] bg-[rgba(111,156,224,0.05)] flex items-center justify-between">
+                    <div className="flex items-center">
+                      <span className="material-icons text-[#6F9CE0] mr-2">menu_book</span>
+                      <h3 className="text-text-dark font-medium font-ma-shan">章节内容预览</h3>
+                    </div>
+                    <div className="flex items-center text-sm text-[#6F9CE0] bg-[rgba(111,156,224,0.1)] px-3 py-1 rounded-full">
+                      <span className="font-medium">已选择 {selectedChapters.length}/{chapters.length} 章</span>
+                    </div>
                   </div>
 
-                  <h3 className="text-xl font-medium text-text-dark mb-2 font-ma-shan">准备开始AI拆书</h3>
-                  <p className="text-center max-w-md mb-6">
-                    从左侧选择需要分析的章节，然后点击"开始AI拆书"按钮，AI将对选中内容进行深度分析
-                  </p>
-
-                  <button
-                    className={`px-5 py-2 rounded-full flex items-center shadow-md ${
-                      selectedChapters.length === 0
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-[#6F9CE0] text-white hover:bg-[#5A8BD0] transition-colors duration-200'
-                    }`}
-                    onClick={() => {
-                      if (selectedChapters.length > 0) {
-                        setIsProcessing(true);
-                        handleAnalyze();
-                      }
+                  <div
+                    className="prose prose-sm max-w-none bg-white p-6 flex-1 overflow-y-auto"
+                    style={{
+                      fontFamily: "'Source Han Sans', 'Noto Sans SC', sans-serif",
+                      fontSize: '18px',
+                      lineHeight: '1.8',
+                      position: 'relative',
+                      height: 'calc(100% - 40px)'
                     }}
-                    disabled={selectedChapters.length === 0}
                   >
-                    <span className="material-icons mr-2">psychology</span>
-                    开始AI拆书
-                  </button>
+                    {selectedChapters.length > 0 ? (
+                      <div className="animate-fadeIn">
+                        {chapters
+                          .filter(chapter => selectedChapters.includes(chapter.id))
+                          .map((chapter, index) => (
+                            <div key={chapter.id} className="mb-8">
+                              <h2 className="text-xl font-bold text-[#6F9CE0] border-b border-[rgba(111,156,224,0.2)] pb-2 mb-4">
+                                {chapter.title}
+                              </h2>
+                              <div className="whitespace-pre-wrap">
+                                {chapter.content}
+                              </div>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-text-light">
+                        <div className="w-20 h-20 rounded-full bg-[rgba(111,156,224,0.1)] flex items-center justify-center mb-4">
+                          <span className="material-icons text-4xl text-[#6F9CE0]">menu_book</span>
+                        </div>
+                        <h3 className="text-xl font-medium text-text-dark mb-2 font-ma-shan">请选择要查看的章节</h3>
+                        <p className="text-center max-w-md mb-6">
+                          从左侧选择需要查看的章节，内容将显示在此区域
+                        </p>
+                      </div>
+                    )}
+
+
+                  </div>
                 </div>
               )}
             </div>

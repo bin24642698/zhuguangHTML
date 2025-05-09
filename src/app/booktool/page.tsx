@@ -1,11 +1,51 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
 import BookToolSidebar from '@/components/booktool/BookToolSidebar';
 import BookToolContent from '@/components/booktool/BookToolContent';
+
+// 使用localStorage键
+const BOOKTOOL_STORAGE_KEY = 'booktool_state';
+
+// 从localStorage加载状态
+const loadStateFromStorage = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      const savedState = localStorage.getItem(BOOKTOOL_STORAGE_KEY);
+      if (savedState) {
+        return JSON.parse(savedState);
+      }
+    } catch (error) {
+      console.error('加载一键拆书状态失败:', error);
+    }
+  }
+  return null;
+};
+
+// 保存状态到localStorage
+const saveStateToStorage = (state: any) => {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(BOOKTOOL_STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.error('保存一键拆书状态失败:', error);
+    }
+  }
+};
+
+// 清除localStorage中的状态
+const clearStoredState = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(BOOKTOOL_STORAGE_KEY);
+    } catch (error) {
+      console.error('清除一键拆书状态失败:', error);
+    }
+  }
+};
 
 export default function BookToolPage() {
   const router = useRouter();
@@ -37,11 +77,38 @@ export default function BookToolPage() {
     }
   };
 
+  // 处理范围选择
+  const handleRangeSelect = (startChapter: number, endChapter: number) => {
+    // 获取在范围内的章节ID
+    const rangeChapterIds = chapters
+      .filter((chapter, index) => {
+        // 使用索引+1作为章节编号（从1开始）
+        const chapterNumber = index + 1;
+        return chapterNumber >= startChapter && chapterNumber <= endChapter;
+      })
+      .map(chapter => chapter.id);
+
+    // 确保章节ID按照原始顺序排列
+    const orderedChapterIds = chapters
+      .filter(chapter => rangeChapterIds.includes(chapter.id))
+      .map(chapter => chapter.id);
+
+    // 设置选中的章节
+    setSelectedChapters(orderedChapterIds);
+  };
+
   // 处理文件上传成功
   const handleFileUploaded = (
     parsedChapters: Array<{id: number, title: string, content: string}>,
     name: string
   ) => {
+    // 清除localStorage中的状态
+    clearStoredState();
+
+    // 清除之前的分析结果
+    setResult('');
+
+    // 设置新状态
     setChapters(parsedChapters);
     setFileName(name);
     // 默认全选章节
@@ -52,6 +119,61 @@ export default function BookToolPage() {
   const handleAnalysisResult = (analysisResult: string) => {
     setResult(analysisResult);
   };
+
+  // 手动重置状态
+  const handleReset = () => {
+    // 清除状态
+    setSelectedChapters([]);
+    setChapters([]);
+    setResult('');
+    setFileName('');
+    setIsProcessing(false);
+
+    // 清除localStorage
+    clearStoredState();
+  };
+
+  // 在组件加载时从localStorage恢复状态
+  useEffect(() => {
+    const savedState = loadStateFromStorage();
+    if (savedState) {
+      if (savedState.chapters && Array.isArray(savedState.chapters)) {
+        setChapters(savedState.chapters);
+      }
+      if (savedState.selectedChapters && Array.isArray(savedState.selectedChapters)) {
+        setSelectedChapters(savedState.selectedChapters);
+      }
+      if (savedState.result) {
+        setResult(savedState.result);
+      }
+      if (savedState.fileName) {
+        setFileName(savedState.fileName);
+      }
+    }
+
+    // 监听beforeunload事件，在页面刷新或关闭时清除状态
+    const handleBeforeUnload = () => {
+      clearStoredState();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  // 监听状态变化并保存到localStorage
+  useEffect(() => {
+    if (chapters.length > 0 || result) {
+      saveStateToStorage({
+        chapters,
+        selectedChapters,
+        result,
+        fileName
+      });
+    }
+  }, [chapters, selectedChapters, result, fileName]);
 
   return (
     <div className="flex h-screen bg-bg-color animate-fadeIn overflow-hidden">
@@ -99,6 +221,7 @@ export default function BookToolPage() {
                 selectedChapters={selectedChapters}
                 onChapterSelect={handleChapterSelect}
                 onSelectAll={handleSelectAll}
+                onRangeSelect={handleRangeSelect}
               />
 
               {/* 右侧内容区 */}

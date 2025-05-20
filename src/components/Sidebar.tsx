@@ -77,11 +77,11 @@ export default function Sidebar({
       if (mainContentAreas.length > 0) {
         mainContentAreas.forEach(mainContent => {
           if (isCollapsed) {
-            // 收起侧边栏时，调整主内容区域宽度和左边距
-            mainContent.setAttribute('style', 'width: calc(100% - 2.5rem); margin-left: 2.5rem;');
+            // 收起侧边栏时，主内容区域使用100%宽度，不预留空间
+            mainContent.setAttribute('style', 'width: 100%; margin-left: 0; transition: width 0.3s ease, margin-left 0.3s ease;');
           } else {
             // 展开侧边栏时，恢复主内容区域宽度和左边距
-            mainContent.setAttribute('style', 'width: calc(100% - 16rem); margin-left: 16rem;');
+            mainContent.setAttribute('style', 'width: calc(100% - 16rem); margin-left: 16rem; transition: width 0.3s ease, margin-left 0.3s ease;');
           }
         });
       }
@@ -93,11 +93,12 @@ export default function Sidebar({
       {/* 收起状态下只显示展开按钮 */}
       {isCollapsed ? (
         <button
-          className="fixed left-0 top-1/2 transform -translate-y-1/2 bg-card-color p-2 rounded-r-xl shadow-md border border-l-0 border-accent-brown/30 text-text-medium hover:text-primary-green transition-colors duration-200 z-50"
+          className="fixed left-0 top-1/2 transform -translate-y-1/2 bg-card-color p-1.5 rounded-r-lg shadow-sm border border-l-0 border-accent-brown/20 text-text-medium hover:text-primary-green transition-all duration-200 z-50 opacity-70 hover:opacity-100"
           onClick={() => setIsCollapsed(false)}
           aria-label="展开侧边栏"
+          style={{ width: '24px', height: '40px' }}
         >
-          <span className="material-icons">chevron_right</span>
+          <span className="material-icons" style={{ fontSize: '18px' }}>chevron_right</span>
         </button>
       ) : (
         <div className="sidebar fixed top-0 left-0 h-screen w-64 border-r border-[rgba(120,180,140,0.2)] bg-card-color shadow-md flex flex-col rounded-tr-2xl rounded-br-2xl transition-all duration-300 z-50" style={{ position: 'fixed' }}>

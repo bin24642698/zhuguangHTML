@@ -1,21 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useAuthStore } from '@/store/slices/authSlice';
+import React from 'react';
 
 /**
- * 认证初始化组件
- * 在应用启动时初始化认证状态，只需要在应用根组件中使用一次
+ * 认证初始化组件 - 静态导出版本
+ *
+ * 注意：这是为了静态导出而修改的临时版本
+ * 在实际部署时应该使用完整的认证初始化逻辑
  */
 export default function AuthInitializer() {
-  const { initialize } = useAuthStore();
-
-  // 在应用启动时初始化认证状态
-  useEffect(() => {
-    console.log('Initializing auth state...');
-    initialize();
-  }, [initialize]);
-
+  // 静态导出版本不执行任何初始化
   // 这个组件不渲染任何内容
   return null;
 }

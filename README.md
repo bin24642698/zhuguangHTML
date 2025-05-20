@@ -2,6 +2,10 @@
 
 烛光写作是一个使用Next.js构建的在线写作平台，结合现代UI设计和AI功能，帮助作者创作、整理和优化他们的作品。
 
+## 项目链接
+
+- GitHub仓库：[https://github.com/bin24642698/zhuguangHTML](https://github.com/bin24642698/zhuguangHTML)
+
 ## 功能特点
 
 - 美观的用户界面，灵感来源于吉卜力工作室的艺术风格
@@ -72,8 +76,6 @@ graph TD
 - 邮箱/密码注册和登录
 - 用户个人信息管理
 - 数据与用户关联，确保数据安全
-
-详细配置和使用说明请参考 [Supabase 集成指南](SUPABASE.md)。
 
 ## 下一步计划
 
